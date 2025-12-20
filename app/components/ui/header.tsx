@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Menu, X } from "lucide-react";
+import { Activity, LogOut, Menu, MessageCircle, X } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { SignInButton } from "../auth/sign-in-button";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/contexts/session-context";
 
 export function Header() {
+
+    const { isAuthenticated, logout, user } = useSession();
+    console.log("Header: Auth state:", { isAuthenticated, user });
+
     const navItems = [
         { href: "/features", label: "Features" },
         { href: "/about", label: "About Yuen" },
@@ -46,8 +51,31 @@ export function Header() {
                     </nav>
                       <div className="flex items-center gap-3">
                         <ThemeToggle />
-                        <SignInButton />
 
+                        {isAuthenticated ? (
+                          <>
+                            <Button
+                              asChild
+                              className="hidden md:flex gap-2 bg-primary/90 hover:bg-primary"
+                            >
+                              <Link href="/therapy/new">
+                                <MessageCircle className="w-4 h-4 mr-1"/>
+                                Start Chat
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={logout}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Sign Out
+                            </Button>
+                          </>
+                        ) : (
+                          <SignInButton />
+                        )}
+                        
                         <Button
                           variant="ghost"
                           size="icon"

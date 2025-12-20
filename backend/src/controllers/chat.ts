@@ -238,3 +238,32 @@ export const getChatHistory = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Error fetching chat history" });
     }
 };
+
+export const getAllChatSessions = async (req: Request, res: Response) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
+        const userId = new Types.ObjectId(req.user.id);
+
+        const sessions = await ChatSession.find({ userId })
+            .sort({ updatedAt: -1 })
+            .select("sessionId messages createdAt updatedAt")
+            .lean();
+
+        res.json(
+            sessions.map((session) => ({
+                sessionId: session.sessionId,
+                messages: session.messages || [],
+                createdAt: session.createdAt,
+                updatedAt: session.updatedAt,
+            }))
+        );
+    } catch (error) {
+        logger.error("Error fetching all chat sessions:", error);
+        res.status(500).json({
+            message: "Failed to fetch chat sessions",
+        });
+    }
+};

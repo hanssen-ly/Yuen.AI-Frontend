@@ -12,12 +12,15 @@ import { AnxietyGames } from "../components/games/anxiety-games";
 import { MoodForm } from "../components/mood/mood-form";
 import { ActivityLogger } from "../components/activities/activity-logger";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/contexts/session-context";
 
 export default function DashboardPage(){
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showMoodModal, setShowMoodModal] = useState(false);
     const [isSavingMood, setIsSavingMood] = useState(false);
     const [showActivityLogger, setShowActivityLogger] = useState(false);
+
+    const { user } = useSession();
 
     const router = useRouter();
 
@@ -91,7 +94,7 @@ export default function DashboardPage(){
                         className="flex flex-col gap-2"
                     >
                         <h1 className="text-3xl font-bold">
-                            Good to see you!
+                            Good to see you, {user?.name}!
                         </h1>
                         <p className="text-muted-foreground text-sm">
                             {currentTime.toLocaleDateString("en-US", {
@@ -254,7 +257,7 @@ export default function DashboardPage(){
                     </DialogHeader>
 
                     {/* moodform */}
-                    <MoodForm onSubmit={handleMoodSubmit} isLoading={isSavingMood}/>
+                    <MoodForm onSuccess={() => setShowMoodModal(false)} />
                 </DialogContent>
             </Dialog>
 

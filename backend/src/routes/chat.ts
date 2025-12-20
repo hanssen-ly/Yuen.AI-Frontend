@@ -1,10 +1,14 @@
 import express from "express";
 import { auth } from "../middleware/auth";
-import { sendMessage, getSessionHistory, getChatHistory, getChatSession, createChatSession } from "../controllers/chat";
+import { sendMessage, getSessionHistory, getChatHistory, getChatSession, createChatSession, getAllChatSessions } from "../controllers/chat";
 
 const router = express.Router();
 
+router.use(auth);
+
 router.post("/sessions", createChatSession);
+
+router.get("/sessions", getAllChatSessions);
 
 router.get("/sessions/:sessionId", getChatSession);
 

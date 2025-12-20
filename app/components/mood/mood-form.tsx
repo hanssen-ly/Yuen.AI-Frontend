@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/contexts/session-context";
 
 interface MoodFormProps {
     onSuccess?: () => void;
@@ -15,6 +16,7 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
     const [moodScore, setMoodScore] = useState(50);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { user, isAuthenticated, loading } = useSession();
 
     const emotions = [
         { value: 0, label: "😞", description: "Struggling"},
@@ -26,6 +28,42 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
 
     const currentEmotion = 
         emotions.find((em) => Math.abs(moodScore - em.value) < 15 ) || emotions[2];
+
+    const handleSubmit = async () => {
+        if (!isAuthenticated) {
+            alert('Authentication required')
+            router.push("/login")
+            return;
+        }
+        try {
+            setIsLoading(true);
+            const token = localStorage.getItem("token");
+
+            const response = await fetch("/api/mood", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ score: moodScore }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error("MoodForm: Error response:", error);
+                throw new Error(error.error || "Failed to track mood");
+            }
+
+            const data = await response.json();
+
+            alert("Mood tracked successfully");
+            onSuccess?.();
+        } catch (err:any) {
+            alert(err.message || "Failed to track mood");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="space-y-6 py-4">
@@ -62,7 +100,13 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
                     className="py-4"
                 />
             </div>
-            <Button className="w-full">Save Your Feeling</Button>
+            <Button 
+            onClick={handleSubmit}
+            disabled={isLoading || loading}
+            className="w-full"
+            >
+                {isLoading ? "Saving..." : "Save Your Feeling"}
+            </Button>
         </div>
     );
 }

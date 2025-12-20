@@ -21,6 +21,8 @@ export interface IChatSession extends Document {
   startTime: Date;
   status: "active" | "completed" | "archived";
   messages: IChatMessage[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const chatMessageSchema = new Schema<IChatMessage>({
@@ -47,7 +49,11 @@ const chatSessionSchema = new Schema<IChatSession>({
     enum: ["active", "completed", "archived"],
   },
   messages: [chatMessageSchema],
-});
+},
+{
+  timestamps: true,
+}
+);
 
 export const ChatSession = model<IChatSession>(
   "ChatSession",

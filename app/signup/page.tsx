@@ -7,12 +7,36 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Lock, Inbox, User } from "lucide-react";
 import Link from "next/link";
+import { registerUser } from "@/lib/api/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage(){
+    const router = useRouter();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+        setLoading(true);
+        try {
+            await registerUser(name, email, password);
+            router.push("/login");
+        } catch (err: any) {
+            setError(err.message || "Signup failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/30">
@@ -28,7 +52,7 @@ export default function LoginPage(){
                     </div>
 
                     {/* form component */}
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={handleSubmit}>
                         <div className="mb-4">
                                 <label
                                     htmlFor="name"
@@ -107,14 +131,17 @@ export default function LoginPage(){
                                 />
                             </div>
                         </div>
-
+                        {error && (
+                            <p className="text-red-500 text-sm text-center">{error}</p>
+                        )}
                         {/* Sign Up Button */}
                         <Button
                             className="w-full mt-4 py-2 text-base rounded-xl font-bold bg-gradient-to-r from-primary to-primary/80 shadow-md hover:from-primary/80 hover:to-primary"
                             size="lg"
-                            type="button"
+                            type="submit"
+                            disabled={loading}
                         >
-                            Sign Up
+                            {loading ? "Signing up..." : "Sign Up"}
                         </Button>
                     </form>
 
