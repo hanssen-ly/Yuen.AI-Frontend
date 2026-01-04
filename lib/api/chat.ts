@@ -42,7 +42,7 @@ export interface ChatMessage {
   
   const API_BASE =
     process.env.BACKEND_API_URL ||
-    "http://localhost:3001";
+    "https://yuen-ai-backend.onrender.com";
   
   // Helper function to get auth headers
   const getAuthHeaders = () => {
