@@ -125,7 +125,7 @@ export default function TherapyPage() {
             }
         };
         loadSessions();
-    }, [messages]);
+    }, [sessionId]);
 
     useEffect(() => {
         setMounted(true);
@@ -180,31 +180,25 @@ export default function TherapyPage() {
 
             const response = await sendChatMessage(sessionId, currentMessage);
 
-            const aiResponse = typeof response === "string" ? JSON.parse(response) : response;
-            console.log("Parsed AI response:", aiResponse);
+            const aiResponse =
+                typeof response === "string" ? JSON.parse(response) : response;
+
+            const assistantText = aiResponse.response;
+
+            if (!assistantText) {
+                throw new Error("No assistant message returned");
+            }
 
             const assistantMessage = {
                 role: "assistant",
-                content: "I appreciate you sharing. What are you feeling in this moment?",
+                content: assistantText,
                 timestamp: new Date(),
-                metadata: {
-                    analysis: aiResponse.analysis || {
-                        emotionalState: "neutral",
-                        riskLevel: 0,
-                        themes: [],
-                        recommendedApproach: "supportive",
-                        ProgressIndicator: [],
-                    },
-                    technique: aiResponse.metadata?.technique || "supportive",
-                    goal: aiResponse.metadata?.currentGoal || "Provide support",
-                    progress: aiResponse.metadata?.progress || {
-                        emotionalState: "neutral",
-                        riskLevel: 0,
-                    },
-                },
+                metadata: aiResponse.metadata,
             };
 
-            setMessages((prev) => [...prev, userMessage, assistantMessage]);
+
+
+            setMessages((prev) => [...prev, assistantMessage]);
             setIsTyping(false);
             scrollToBottom();
         } catch (error) {
@@ -272,7 +266,8 @@ export default function TherapyPage() {
         <div className="relative max-w-7xl mx-auto px-4">
             <div className="flex h-[calc(100vh-4rem)] mt-20 gap-6">
 
-                <div className="w-80 flex flex-col border-r bg-muted/30">
+                <div className="w-80 flex flex-col bg-muted/30 h-full rounded-xl overflow-hidden border">
+
                     <div className="p-4 border-b">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold">Recent Chats</h2>
@@ -365,7 +360,7 @@ export default function TherapyPage() {
                     </div>
                     </div>
 
-                    {message.length === 0 ? (
+                    {messages.length === 0 ? (
                         <div className="flex-1 flex items-center justify-center p-4">
                             <div className="max-w-2xl w-full space-y-8">
                                 <div className="text-center space-y-4">
@@ -405,7 +400,7 @@ export default function TherapyPage() {
                                 <AnimatePresence initial={false}>
                                     {messages.map((msg) => (
                                         <motion.div
-                                            key={msg.timestamp.toISOString()}
+                                            key={`${msg.role}-${msg.timestamp.toISOString()}`}
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.3 }}

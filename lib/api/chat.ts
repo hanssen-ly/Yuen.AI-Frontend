@@ -80,31 +80,32 @@ export interface ChatMessage {
     sessionId: string,
     message: string
   ): Promise<ApiResponse> => {
-    try {
-      console.log(`Sending message to session ${sessionId}:`, message);
-      const response = await fetch(
-        `${API_BASE}/chat/sessions/${sessionId}/messages`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ message }),
-        }
-      );
+    console.log("🚀 sendChatMessage called", { sessionId, message });
   
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Failed to send message:", error);
-        throw new Error(error.error || "Failed to send message");
+    const response = await fetch(
+      `${API_BASE}/chat/sessions/${sessionId}/messages`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ message }),
       }
+    );
   
-      const data = await response.json();
-      console.log("Message sent successfully:", data);
-      return data;
-    } catch (error) {
-      console.error("Error sending chat message:", error);
-      throw error;
+    const rawText = await response.text();
+    console.log("📦 RAW RESPONSE:", rawText);
+  
+    if (!response.ok) {
+      throw new Error(rawText || "Failed to send message");
+    }
+  
+    try {
+      return JSON.parse(rawText);
+    } catch {
+      throw new Error("Server returned non-JSON success response");
     }
   };
+  
+  
   
   export const getChatHistory = async (
     sessionId: string
