@@ -12,7 +12,7 @@ export async function GET(
         console.log(`Getting chat history for session ${sessionId}`);
 
         const response = await fetch(
-            `${BACKEND_API_URL}/chat/sessions/${sessionId}/history`,
+            `/api/chat/sessions/${sessionId}/history`,
             {
                 method: "GET",
                 headers: {
