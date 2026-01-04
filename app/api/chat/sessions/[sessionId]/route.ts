@@ -11,7 +11,7 @@ export async function GET(
         const { sessionId } = await context.params;
 
         const response = await fetch(
-            `${BACKEND_API_URL}/chat/sessions/${sessionId}/history`
+            `/api/chat/sessions/${sessionId}/history`
         );
 
         if (!response.ok) {
@@ -45,7 +45,7 @@ export async function POST(
         }
 
         const response = await fetch(
-            `${BACKEND_API_URL}/chat/sessions/${sessionId}/messages`,
+            `/api/chat/sessions/${sessionId}/messages`,
             {
                 method: "POST",
                 headers: {
