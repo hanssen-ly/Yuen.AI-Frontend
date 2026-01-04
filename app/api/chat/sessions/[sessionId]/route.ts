@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:3001";
+const BACKEND_API_URL =
+    process.env.BACKEND_API_URL || "http://localhost:3001";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { sessionId: string } }
+    context: { params: Promise<{ sessionId: string }> }
 ) {
     try {
-        const { sessionId } = params;
+        const { sessionId } = await context.params;
+
         const response = await fetch(
             `${BACKEND_API_URL}/chat/sessions/${sessionId}/history`
         );
@@ -15,6 +17,7 @@ export async function GET(
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
@@ -26,9 +29,12 @@ export async function GET(
     }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { sessionId: string } }) {
+export async function POST(
+    req: NextRequest,
+    context: { params: Promise<{ sessionId: string }> }
+) {
     try {
-        const { sessionId } = params;
+        const { sessionId } = await context.params;
         const { message } = await req.json();
 
         if (!message) {
