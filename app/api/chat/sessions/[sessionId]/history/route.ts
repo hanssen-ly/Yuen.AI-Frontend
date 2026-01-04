@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:3001";
+const BACKEND_API_URL =
+    process.env.BACKEND_API_URL || "http://localhost:3001";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { sessionId: string } }
+    context: { params: Promise<{ sessionId: string }> }
 ) {
     try {
-        const { sessionId } = params;
+        const { sessionId } = await context.params;
         console.log(`Getting chat history for session ${sessionId}`);
 
         const response = await fetch(
@@ -38,9 +39,9 @@ export async function GET(
         }));
 
         return NextResponse.json(formattedMessages);
-    } catch (error){
+    } catch (error) {
         return NextResponse.json(
-            { error: "Failed to send message" },
+            { error: "Failed to get chat history" },
             { status: 500 }
         );
     }
