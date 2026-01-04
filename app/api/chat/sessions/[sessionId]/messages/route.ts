@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_API_URL =
-  process.env.BACKEND_API_URL ||
-  "http://localhost:3001";
+  process.env.BACKEND_API_URL || "http://localhost:3001";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string } }
+  context: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params;
+    const { sessionId } = await context.params;
     const body = await req.json();
     const { message } = body;
 
@@ -21,6 +20,7 @@ export async function POST(
     }
 
     console.log(`Sending message to session ${sessionId}:`, message);
+
     const response = await fetch(
       `${BACKEND_API_URL}/chat/sessions/${sessionId}/messages`,
       {
