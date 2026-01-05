@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/contexts/session-context";
 
 interface MoodFormProps {
-    onSuccess?: () => void;
+    onSuccess?: (score: number) => void;
 }
 
 export function MoodForm({ onSuccess }: MoodFormProps) {
@@ -17,6 +17,7 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { user, isAuthenticated, loading } = useSession();
+    
 
     const emotions = [
         { value: 0, label: "😞", description: "Struggling"},
@@ -57,7 +58,7 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
             const data = await response.json();
 
             alert("Mood tracked successfully");
-            onSuccess?.();
+            onSuccess?.(moodScore);
         } catch (err:any) {
             alert(err.message || "Failed to track mood");
         } finally {

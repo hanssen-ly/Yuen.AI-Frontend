@@ -20,6 +20,8 @@ export default function DashboardPage(){
     const [isSavingMood, setIsSavingMood] = useState(false);
     const [showActivityLogger, setShowActivityLogger] = useState(false);
 
+    const [moodScore, setMoodScore] = useState<number | null>(null);
+
     const { user } = useSession();
 
     const router = useRouter();
@@ -32,7 +34,7 @@ export default function DashboardPage(){
     const wellnessStats = [
         {
             title: "Mood Score",
-            value: "No data",
+            value: moodScore !== null ? `${moodScore}/10` : "No data",
             icon: Brain,
             color: "text-purple-500",
             bgColor: "bg-purple-500/10",
@@ -257,7 +259,13 @@ export default function DashboardPage(){
                     </DialogHeader>
 
                     {/* moodform */}
-                    <MoodForm onSuccess={() => setShowMoodModal(false)} />
+                    <MoodForm
+                        onSuccess={(score: number) => {
+                            setMoodScore(score);
+                            setShowMoodModal(false);
+                        }}
+                    />
+
                 </DialogContent>
             </Dialog>
 
