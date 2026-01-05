@@ -31,10 +31,57 @@ export default function DashboardPage(){
         return () => clearInterval(timer);
     }, []);
 
+    useEffect(() => {
+        const loadTodayMood = async () => {
+            try {
+                const token = localStorage.getItem("token");
+    
+                if (!token) return;
+    
+                const response = await fetch("/api/mood/today", {
+                    method: "GET",
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+    
+                    if (typeof data.score === "number") {
+                        setMoodScore(data.score);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load today's mood:", error);
+            }
+        };
+    
+        loadTodayMood();
+    }, []);
+
+    const moodLabels = [
+        { value: 0, label: "Struggling" },
+        { value: 25, label: "Low" },
+        { value: 50, label: "Okay" },
+        { value: 75, label: "Better" },
+        { value: 100, label: "Really Good" },
+    ];
+
+    const getClosestMoodLabel = (score: number) => {
+        return (
+            moodLabels.find(
+                (m) => Math.abs(score - m.value) < 15
+            )?.label ?? "Okay"
+        );
+    };
+
     const wellnessStats = [
         {
             title: "Mood Score",
-            value: moodScore !== null ? `${moodScore}/10` : "No data",
+            value: moodScore !== null
+                ? getClosestMoodLabel(moodScore)
+                : "No data",
             icon: Brain,
             color: "text-purple-500",
             bgColor: "bg-purple-500/10",
