@@ -51,27 +51,16 @@ const games = [
 ];
 
 interface AnxietyGamesProps {
-    onGamePlayed?: (gameName: string, description: string) => Promise<void>;
+    onComplete?: () => void;
 }
 
-export const AnxietyGames = ({ onGamePlayed }: AnxietyGamesProps) => {
+export const AnxietyGames = ({ onComplete }: AnxietyGamesProps) => {
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
     const [showGame, setShowGame] = useState(false);
 
     const handleGameStart = async (gameId: string) => {
         setSelectedGame(gameId);
         setShowGame(true);
-
-        if (onGamePlayed) {
-            try {
-                await onGamePlayed(
-                    gameId,
-                    games.find((g) => g.id === gameId)?. description || ""
-                );
-            } catch (error) {
-                console.error("Error logging game activity:", error);
-            }
-        }
     };
 
     const renderGame = () => {
@@ -146,7 +135,15 @@ export const AnxietyGames = ({ onGamePlayed }: AnxietyGamesProps) => {
                 </CardContent>
             </Card>
 
-            <Dialog open={showGame} onOpenChange= {setShowGame}>
+            <Dialog
+                open={showGame}
+                onOpenChange={(open) => {
+                    if (!open && showGame) {
+                        onComplete?.(); 
+                    }
+                    setShowGame(open);
+                }}
+            >
                 <DialogContent className="sm:max-w-[600px] bg-white dark:bg-background">
                     <DialogHeader>
                         <DialogTitle>

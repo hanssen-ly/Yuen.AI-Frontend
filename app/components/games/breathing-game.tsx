@@ -6,7 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Wind } from "lucide-react";
 import { useState, useEffect } from "react";
 
-export function BreathingGame(){
+type BreathingGameProps = {
+    onComplete?: () => void;
+};
+
+export function BreathingGame({ onComplete }: BreathingGameProps){
     const [phase, setPhase] = useState<"inhale" | "hold" | "exhale">("inhale");
     const [progress, setProgress] = useState(0);
     const [round, setRound] = useState(1);
@@ -59,6 +63,13 @@ export function BreathingGame(){
 
         return () => clearInterval(timer);
     }, [phase, round, isComplete, isPaused]);
+
+    useEffect(() => {
+        if (isComplete) {
+            onComplete?.();
+        }
+    }, [isComplete, onComplete]);
+    
 
     const handleReset = () => {
         setPhase("inhale");

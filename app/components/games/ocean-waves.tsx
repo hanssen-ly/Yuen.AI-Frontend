@@ -10,13 +10,18 @@ import { Progress } from "@/components/ui/progress";
 const BREATH_DURATION = 8; 
 const SESSION_DURATION = 8 * 60; 
 
-export function OceanWaves() {
+type OceanWavesProps = {
+  onComplete?: () => void;
+};
+
+export function OceanWaves({ onComplete }: OceanWavesProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const waveControls = useAnimation();
   const [audio] = useState(new Audio("/sounds/waves.mp3"));
+  const [hasCompleted, setHasCompleted] = useState(false);
 
   useEffect(() => {
     audio.loop = true;
@@ -58,6 +63,15 @@ export function OceanWaves() {
 
     return () => clearInterval(timer);
   }, [isPlaying, elapsedTime]);
+
+  useEffect(() => {
+    if (!hasCompleted && elapsedTime >= SESSION_DURATION) {
+      setHasCompleted(true);
+      audio.pause();
+      onComplete?.();
+    }
+  }, [elapsedTime, hasCompleted, audio, onComplete]);
+  
 
   const togglePlay = () => {
     if (isPlaying) {

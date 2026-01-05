@@ -9,7 +9,11 @@ import { Progress } from "@/components/ui/progress";
 
 const MEDITATION_DURATION = 15 * 60;
 
-export function ForestGame() {
+type ForestGameProps = {
+    onComplete?: () => void;
+};
+
+export function ForestGame({ onComplete }: ForestGameProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(50);
     const [progress, setProgress] = useState(0);
@@ -19,6 +23,8 @@ export function ForestGame() {
         wind: new Audio("/sounds/wind.mp3"),
         leaves: new Audio("/sounds/leaves.mp3"),
     });
+    const [hasCompleted, setHasCompleted] = useState(false);
+
 
     useEffect(() => {
         Object.values(audioElements).forEach((audio) => {
@@ -55,6 +61,14 @@ export function ForestGame() {
 
         return () => clearInterval(timer);
     }, [isPlaying, elapsedTime]);
+
+    useEffect(() => {
+        if (!hasCompleted && elapsedTime >= MEDITATION_DURATION) {
+            setHasCompleted(true);
+            Object.values(audioElements).forEach((audio) => audio.pause());
+            onComplete?.();
+        }
+    }, [elapsedTime, hasCompleted, audioElements, onComplete]);    
 
     const togglePlay = () => {
         if (isPlaying) {

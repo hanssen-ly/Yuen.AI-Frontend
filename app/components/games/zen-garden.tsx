@@ -10,7 +10,11 @@ const items = [
     { type: "bamboo", icon: "🎋" },
 ];
 
-export function ZenGarden() {
+type ZenGardenProps = {
+    onComplete?: () => void;
+};
+
+export function ZenGarden({ onComplete }: ZenGardenProps) {
     const [placedItems, setPlacedItems] = useState<
     Array<{
         type: string;
@@ -21,14 +25,23 @@ export function ZenGarden() {
     >([]);
 
     const [selectedItem, setSelectedItem] = useState(items[0]);
-
+    const [hasCompleted, setHasCompleted] = useState(false);
     const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
-        setPlacedItems([...placedItems, { ...selectedItem, x, y }]);
+    
+        setPlacedItems((prev) => {
+            if (!hasCompleted && prev.length === 0) {
+                setHasCompleted(true);
+                onComplete?.();
+            }
+    
+            return [...prev, { ...selectedItem, x, y }];
+        });
     };
+    
+    
 
     return (
         <div className="space-y-4">

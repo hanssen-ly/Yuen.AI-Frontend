@@ -21,6 +21,11 @@ export default function DashboardPage(){
     const [showActivityLogger, setShowActivityLogger] = useState(false);
 
     const [moodScore, setMoodScore] = useState<number | null>(null);
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const activitiesStorageKey = `activitiesCount:${todayKey}`;
+
+    const [totalActivities, setTotalActivities] = useState<number>(0);
+
 
     const { user } = useSession();
 
@@ -60,6 +65,15 @@ export default function DashboardPage(){
         loadTodayMood();
     }, []);
 
+    useEffect(() => {
+        const saved = localStorage.getItem(activitiesStorageKey);
+        setTotalActivities(saved ? Number(saved) : 0);
+    }, [activitiesStorageKey]);
+    
+    useEffect(() => {
+        localStorage.setItem(activitiesStorageKey, String(totalActivities));
+    }, [activitiesStorageKey, totalActivities]);    
+
     const moodLabels = [
         { value: 0, label: "Struggling" },
         { value: 25, label: "Low" },
@@ -75,6 +89,10 @@ export default function DashboardPage(){
             )?.label ?? "Okay"
         );
     };
+
+    const incrementActivities = (amount: number = 1) => {
+        setTotalActivities((prev) => prev + amount);
+    };    
 
     const wellnessStats = [
         {
@@ -105,11 +123,11 @@ export default function DashboardPage(){
         },
         {
             title: "Total Activities",
-            value: 80,
+            value: totalActivities,
             icon: Activity,
             color: "text-blue-500",
             bgColor: "bg-blue-500/10",
-            description: "Planned for today",
+            description: "Completed today",
         },
     ]
 
@@ -291,7 +309,7 @@ export default function DashboardPage(){
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-3 space-y-6">
                             {/* anxiety games */}
-                                <AnxietyGames/>
+                            <AnxietyGames onComplete={() => incrementActivities(1)} />
                         </div>
                     </div>
                 </div>
@@ -320,6 +338,7 @@ export default function DashboardPage(){
             <ActivityLogger
                 open={showActivityLogger}
                 onOpenChange={setShowActivityLogger}
+                onComplete={() => incrementActivities(1)}
             />
         </div>
     );

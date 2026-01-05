@@ -18,12 +18,13 @@ const activityTypes = [
     { id: "therapy", name: "Therapy Session" },
 ];
 
-interface ActivityLoggerProps {
+type ActivityLoggerProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-}
+    onComplete?: () => void;
+};
 
-export function ActivityLogger({ open, onOpenChange}: ActivityLoggerProps) {
+export function ActivityLogger({ open, onOpenChange, onComplete}: ActivityLoggerProps) {
     const [type, setType] = useState("");
     const [name, setName] = useState("");
     const [duration, setDuration] = useState("");
@@ -53,7 +54,8 @@ export function ActivityLogger({ open, onOpenChange}: ActivityLoggerProps) {
             setDescription("");
             setIsLoading(false);
 
-            alert("Activity logged (mock)!");
+            alert("Activity logged!");
+            onComplete?.();  
             onOpenChange(false);
         }, 1000);
     };
@@ -111,11 +113,25 @@ export function ActivityLogger({ open, onOpenChange}: ActivityLoggerProps) {
                             />
 
                             <div className="flex justify-end gap-2">
-                                <Button type="button" variant="ghost">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled>
-                                    Capture This Moment
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => onOpenChange(false)}
+                            >
+                                Cancel
+                            </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading || !type || !name}
+                                >
+                                    {isLoading ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </span>
+                                    ) : (
+                                        "Capture This Moment"
+                                    )}
                                 </Button>
                             </div>
                         </div>
