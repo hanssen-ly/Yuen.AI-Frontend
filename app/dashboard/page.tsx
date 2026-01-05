@@ -22,9 +22,12 @@ export default function DashboardPage(){
 
     const [moodScore, setMoodScore] = useState<number | null>(null);
     const todayKey = new Date().toISOString().slice(0, 10);
-    const activitiesStorageKey = `activitiesCount:${todayKey}`;
 
+    const activitiesStorageKey = `activitiesCount:${todayKey}`;
     const [totalActivities, setTotalActivities] = useState<number>(0);
+
+    const sessionsStorageKey = `mindfulSessions:${todayKey}`;
+    const [mindfulSessions, setMindfulSessions] = useState<number>(0);
 
 
     const { user } = useSession();
@@ -74,6 +77,16 @@ export default function DashboardPage(){
         localStorage.setItem(activitiesStorageKey, String(totalActivities));
     }, [activitiesStorageKey, totalActivities]);    
 
+    useEffect(() => {
+        const saved = localStorage.getItem(sessionsStorageKey);
+        setMindfulSessions(saved ? Number(saved) : 0);
+    }, [sessionsStorageKey]);
+
+    useEffect(() => {
+        localStorage.setItem(sessionsStorageKey, String(mindfulSessions));
+    }, [sessionsStorageKey, mindfulSessions]);
+    
+
     const moodLabels = [
         { value: 0, label: "Struggling" },
         { value: 25, label: "Low" },
@@ -93,6 +106,11 @@ export default function DashboardPage(){
     const incrementActivities = (amount: number = 1) => {
         setTotalActivities((prev) => prev + amount);
     };    
+
+    const incrementMindfulSessions = () => {
+        setMindfulSessions((prev) => prev + 1);
+    };
+    
 
     const wellnessStats = [
         {
@@ -115,7 +133,7 @@ export default function DashboardPage(){
         },
         {
             title: "Mindful Sessions",
-            value: `0 sessions`,
+            value: `${mindfulSessions} sessions`,
             icon: Heart,
             color: "text-rose-500",
             bgColor: "bg-rose-500/10",
@@ -147,8 +165,9 @@ export default function DashboardPage(){
     };
 
     const handleStartTherapy = () => {
+        incrementMindfulSessions();
         router.push("/therapy/new");
-    };
+    };    
 
     return (
         <div className="min-h-screen bg-background p-26">
