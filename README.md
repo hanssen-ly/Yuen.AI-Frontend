@@ -28,5 +28,6 @@ When you first open Yuen.AI, you’re welcomed by a home page featuring a mood s
 
 ## Contact Me
 Instagram: [ly_hanssen](https://www.instagram.com/ly_hanssen/)
+
 LinkedIn: [hanssen-ly](https://www.linkedin.com/in/hanssen-ly-869501353/)
 
