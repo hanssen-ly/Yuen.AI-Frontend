@@ -20,6 +20,15 @@ export function Header() {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const incrementMindfulSessions = () => {
+      const todayKey = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+      const storageKey = `mindfulSessions:${todayKey}`;
+    
+      const current = Number(localStorage.getItem(storageKey) || "0");
+      localStorage.setItem(storageKey, String(current + 1));
+    };
+    
+
     return <div className="w-full fixed top-0 z-50 bg-background/95 backdrop-blur">
         <div className="absolute inset-0 border-b border-primary/10"></div>
         <header className="relative max-w-6xl mx-auto px-4">
@@ -57,6 +66,7 @@ export function Header() {
                             <Button
                               asChild
                               className="hidden md:flex gap-2 bg-primary/90 hover:bg-primary"
+                              onClick={incrementMindfulSessions}
                             >
                               <Link href="/therapy/new">
                                 <MessageCircle className="w-4 h-4 mr-1"/>

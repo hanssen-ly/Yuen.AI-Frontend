@@ -29,6 +29,27 @@ export default function DashboardPage(){
     const sessionsStorageKey = `mindfulSessions:${todayKey}`;
     const [mindfulSessions, setMindfulSessions] = useState<number>(0);
 
+    const completionStorageKey = `completion:${todayKey}`;
+
+    type CompletionMap = {
+        beginSession: boolean;
+        trackMood: boolean;
+        checkIn: boolean;
+        breathingGame: boolean;
+        forestGame: boolean;
+        oceanWaves: boolean;
+        zenGarden: boolean;
+    };
+
+    const [completion, setCompletion] = useState<CompletionMap>({
+        beginSession: false,
+        trackMood: false,
+        checkIn: false,
+        breathingGame: false,
+        forestGame: false,
+        oceanWaves: false,
+        zenGarden: false,
+    });
 
     const { user } = useSession();
 
@@ -85,6 +106,17 @@ export default function DashboardPage(){
     useEffect(() => {
         localStorage.setItem(sessionsStorageKey, String(mindfulSessions));
     }, [sessionsStorageKey, mindfulSessions]);
+
+    useEffect(() => {
+        const saved = localStorage.getItem(completionStorageKey);
+        if (saved) {
+            setCompletion(JSON.parse(saved));
+        }
+    }, [completionStorageKey]);
+    
+    useEffect(() => {
+        localStorage.setItem(completionStorageKey, JSON.stringify(completion));
+    }, [completionStorageKey, completion]);    
     
 
     const moodLabels = [
@@ -111,6 +143,13 @@ export default function DashboardPage(){
         setMindfulSessions((prev) => prev + 1);
     };
     
+    const totalCompletionItems = Object.keys(completion).length;
+
+    const completedCount = Object.values(completion).filter(Boolean).length;
+
+    const completionRate = Math.round(
+        (completedCount / totalCompletionItems) * 100
+    );
 
     const wellnessStats = [
         {
@@ -125,12 +164,12 @@ export default function DashboardPage(){
         },
         {
             title: "Completion Rate",
-            value: "100%",
+            value: `${completionRate}%`,
             icon: Trophy,
             color: "text-yellow-500",
             bgColor: "bg-yellow-500/10",
-            description: "Perfect completion rate",
-        },
+            description: `${completedCount}/${totalCompletionItems} completed`,
+        },        
         {
             title: "Mindful Sessions",
             value: `${mindfulSessions} sessions`,
@@ -166,8 +205,18 @@ export default function DashboardPage(){
 
     const handleStartTherapy = () => {
         incrementMindfulSessions();
+        markCompleted("beginSession");
         router.push("/therapy/new");
-    };    
+    };
+    
+
+    const markCompleted = (key: keyof CompletionMap) => {
+        setCompletion((prev) => {
+            if (prev[key]) return prev; 
+            return { ...prev, [key]: true };
+        });
+    };
+
 
     return (
         <div className="min-h-screen bg-background p-26">
@@ -328,7 +377,12 @@ export default function DashboardPage(){
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-3 space-y-6">
                             {/* anxiety games */}
-                            <AnxietyGames onComplete={() => incrementActivities(1)} />
+                            <AnxietyGames
+                                onComplete={(key) => {
+                                    incrementActivities(1);
+                                    markCompleted(key);
+                                }}
+                                />
                         </div>
                     </div>
                 </div>
@@ -344,10 +398,11 @@ export default function DashboardPage(){
 
                     {/* moodform */}
                     <MoodForm
-                        onSuccess={(score: number) => {
-                            setMoodScore(score);
-                            setShowMoodModal(false);
-                        }}
+                    onSuccess={(score: number) => {
+                        setMoodScore(score);
+                        markCompleted("trackMood");
+                        setShowMoodModal(false);
+                    }}
                     />
 
                 </DialogContent>
@@ -357,8 +412,12 @@ export default function DashboardPage(){
             <ActivityLogger
                 open={showActivityLogger}
                 onOpenChange={setShowActivityLogger}
-                onComplete={() => incrementActivities(1)}
+                onComplete={() => {
+                    incrementActivities(1);
+                    markCompleted("checkIn");
+                }}
             />
+
         </div>
     );
 }

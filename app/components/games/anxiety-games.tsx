@@ -51,8 +51,9 @@ const games = [
 ];
 
 interface AnxietyGamesProps {
-    onComplete?: () => void;
+    onComplete?: (key: "breathingGame" | "zenGarden" | "forestGame" | "oceanWaves") => void;
 }
+
 
 export const AnxietyGames = ({ onComplete }: AnxietyGamesProps) => {
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -66,17 +67,34 @@ export const AnxietyGames = ({ onComplete }: AnxietyGamesProps) => {
     const renderGame = () => {
         switch (selectedGame) {
             case "breathing":
-                return <BreathingGame />;
+                return (
+                    <BreathingGame
+                        onComplete={() => onComplete?.("breathingGame")}
+                    />
+                );
             case "garden":
-                return <ZenGarden />;
+                return (
+                    <ZenGarden
+                        onComplete={() => onComplete?.("zenGarden")}
+                    />
+                );
             case "forest":
-                return <ForestGame />;
+                return (
+                    <ForestGame
+                        onComplete={() => onComplete?.("forestGame")}
+                    />
+                );
             case "waves":
-                return <OceanWaves />;
+                return (
+                    <OceanWaves
+                        onComplete={() => onComplete?.("oceanWaves")}
+                    />
+                );
             default:
                 return null;
         }
     };
+    
 
     return (
         <>
@@ -137,12 +155,8 @@ export const AnxietyGames = ({ onComplete }: AnxietyGamesProps) => {
 
             <Dialog
                 open={showGame}
-                onOpenChange={(open) => {
-                    if (!open && showGame) {
-                        onComplete?.(); 
-                    }
-                    setShowGame(open);
-                }}
+                onOpenChange={setShowGame}
+
             >
                 <DialogContent className="sm:max-w-[600px] bg-white dark:bg-background">
                     <DialogHeader>
